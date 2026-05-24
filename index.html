@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart City Navigation — DSA Project</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════
+   SMART CITY NAVIGATION — STYLESHEET
+   Dark Classic Theme · JetBrains Mono
+   ══════════════════════════════════════ */
+
+:root {
+  --bg:        #0d0f14;
+  --bg2:       #13161e;
+  --bg3:       #1a1e2a;
+  --bg4:       #21263a;
+  --border:    #2a2f45;
+  --border2:   #363c57;
+  --text:      #e2e4f0;
+  --text2:     #8b90aa;
+  --text3:     #555a75;
+
+  --green:     #4ade80;
+  --green-d:   #166534;
+  --green-bg:  #0f2a1a;
+  --blue:      #60a5fa;
+  --blue-d:    #1e3a5f;
+  --blue-bg:   #0a1929;
+  --red:       #f87171;
+  --red-d:     #5f1e1e;
+  --red-bg:    #1f0a0a;
+  --amber:     #fbbf24;
+  --amber-bg:  #1f1500;
+  --purple:    #c084fc;
+  --purple-bg: #1a0a2e;
+  --cyan:      #22d3ee;
+  --cyan-bg:   #00141a;
+  --orange:    #fb923c;
+  --pink:      #f472b6;
+  --pink-bg:   #1f0a16;
+
+  --radius:    10px;
+  --radius-sm: 6px;
+  --font:      'JetBrains Mono', monospace;
+  --font-ui:   'Syne', sans-serif;
+  --shadow:    0 4px 24px rgba(0,0,0,0.5);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+/* ── HEADER ── */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  animation: slideDown 0.4s ease;
+}
+@keyframes slideDown { from { transform: translateY(-100%); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
+.header-left { display: flex; align-items: center; gap: 14px; }
+.logo-mark {
+  font-size: 32px;
+  color: var(--blue);
+  filter: drop-shadow(0 0 8px rgba(96,165,250,0.5));
+  animation: pulse 3s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{filter:drop-shadow(0 0 8px rgba(96,165,250,0.5))} 50%{filter:drop-shadow(0 0 16px rgba(96,165,250,0.9))} }
+
+.site-title {
+  font-family: var(--font-ui);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+.site-title .accent { color: var(--blue); }
+.site-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+.header-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.tag {
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  border: 1px solid;
+}
+.tag-graph  { color: var(--blue);   background: var(--blue-bg);   border-color: var(--blue-d); }
+.tag-bfs    { color: var(--green);  background: var(--green-bg);  border-color: var(--green-d); }
+.tag-dfs    { color: var(--amber);  background: var(--amber-bg);  border-color: #3d2a00; }
+.tag-tree   { color: var(--purple); background: var(--purple-bg); border-color: #3d1a5f; }
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 240px 1fr 280px;
+  gap: 0;
+  min-height: calc(100vh - 57px - 42px);
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: calc(100vh - 57px - 42px);
+  animation: fadeIn 0.5s ease 0.2s both;
+}
+.sidebar-right {
+  border-right: none;
+  border-left: 1px solid var(--border);
+  animation-delay: 0.3s;
+}
+@keyframes fadeIn { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:translateX(0); } }
+
+/* ── CARD ── */
+.card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border2); }
+.card-title {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text2);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── DOTS ── */
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.dot-green  { background: var(--green);  box-shadow: 0 0 6px var(--green); }
+.dot-red    { background: var(--red);    box-shadow: 0 0 6px var(--red); }
+.dot-blue   { background: var(--blue);   box-shadow: 0 0 6px var(--blue); }
+.dot-gold   { background: var(--amber);  box-shadow: 0 0 6px var(--amber); }
+.dot-purple { background: var(--purple); box-shadow: 0 0 6px var(--purple); }
+.dot-cyan   { background: var(--cyan);   box-shadow: 0 0 6px var(--cyan); }
+.dot-orange { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+.dot-pink   { background: var(--pink);   box-shadow: 0 0 6px var(--pink); }
+
+/* ── SELECT ── */
+.styled-select {
+  width: 100%;
+  background: var(--bg4);
+  color: var(--text);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-family: var(--font);
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.styled-select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(96,165,250,0.15); }
+
+/* ── ALGO BUTTONS ── */
+.algo-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.algo-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 8px;
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font);
+}
+.algo-btn:hover { border-color: var(--blue); color: var(--text); }
+.algo-btn.active {
+  background: var(--blue-bg);
+  border-color: var(--blue);
+  color: var(--blue);
+  box-shadow: 0 0 12px rgba(96,165,250,0.15);
+}
+.algo-btn.active-dfs {
+  background: var(--amber-bg);
+  border-color: var(--amber);
+  color: var(--amber);
+  box-shadow: 0 0 12px rgba(251,191,36,0.15);
+}
+.algo-icon { font-size: 16px; }
+.algo-name { font-size: 13px; font-weight: 700; }
+.algo-desc { font-size: 9px; color: inherit; opacity: 0.7; }
+
+/* ── RUN / RESET ── */
+.run-btn {
+  width: 100%;
+  padding: 11px;
+  background: var(--blue);
+  color: #000;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+.run-btn:hover { background: #93c5fd; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(96,165,250,0.3); }
+.run-btn:active { transform: translateY(0); }
+.run-btn.running { background: var(--green); animation: runPulse 1s ease-in-out infinite; }
+@keyframes runPulse { 0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,0.4)} 50%{box-shadow:0 0 0 8px rgba(74,222,128,0)} }
+.run-icon { font-size: 14px; }
+
+.reset-btn {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+/* ── RESULT PATH ── */
+.result-card { border-color: var(--amber); background: var(--amber-bg); animation: popIn 0.3s ease; }
+@keyframes popIn { from { transform: scale(0.95); opacity:0; } to { transform: scale(1); opacity:1; } }
+.path-chain { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.path-node {
+  padding: 3px 9px;
+  background: var(--bg3);
+  border: 1px solid var(--amber);
+  border-radius: 99px;
+  color: var(--amber);
+  font-size: 10px;
+  font-weight: 600;
+  animation: nodeAppear 0.2s ease both;
+}
+@keyframes nodeAppear { from { transform: scale(0); } to { transform: scale(1); } }
+.path-arrow { color: var(--text3); font-size: 10px; }
+.path-stats { margin-top: 8px; font-size: 11px; color: var(--text2); }
+.path-stats span { color: var(--amber); font-weight: 600; }
+
+/* ── HISTORY ── */
+.history-count {
+  margin-left: auto;
+  background: var(--purple-bg);
+  color: var(--purple);
+  border: 1px solid var(--purple);
+  border-radius: 99px;
+  padding: 0px 6px;
+  font-size: 10px;
+}
+.history-list { max-height: 100px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.history-item {
+  padding: 5px 8px;
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  color: var(--text2);
+  animation: slideIn 0.2s ease;
+}
+@keyframes slideIn { from { transform: translateX(-10px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+.history-item .hi-algo { font-weight: 700; }
+.history-item .hi-algo.bfs { color: var(--blue); }
+.history-item .hi-algo.dfs { color: var(--amber); }
+.empty-msg { color: var(--text3); font-size: 11px; padding: 4px 0; }
+.undo-btn {
+  margin-top: 8px;
+  width: 100%;
+  padding: 6px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text3);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.undo-btn:hover { border-color: var(--purple); color: var(--purple); }
+
+/* ── CANVAS ── */
+.canvas-area {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  animation: fadeIn 0.5s ease 0.1s both;
+}
+.canvas-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+}
+.canvas-label { font-size: 11px; color: var(--text2); font-weight: 600; letter-spacing: 0.5px; }
+.canvas-hint  { font-size: 11px; color: var(--text3); }
+
+.canvas-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  min-height: 400px;
+}
+#graph-svg { width: 100%; max-width: 700px; }
+
+/* ── SVG STYLES ── */
+.svg-edge {
+  stroke: #2a2f45;
+  stroke-width: 2;
+  transition: stroke 0.4s, stroke-width 0.4s;
+}
+.svg-edge.active { stroke: var(--amber); stroke-width: 3; filter: drop-shadow(0 0 4px rgba(251,191,36,0.5)); }
+.svg-edge.path   { stroke: var(--green); stroke-width: 3; filter: drop-shadow(0 0 4px rgba(74,222,128,0.5)); }
+
+.svg-node-wrap { cursor: pointer; }
+.svg-node-wrap:hover circle { filter: brightness(1.2); }
+
+.svg-circle {
+  fill: #1a1e2a;
+  stroke: #363c57;
+  stroke-width: 2;
+  transition: fill 0.3s, stroke 0.3s, r 0.2s;
+}
+.svg-circle.source   { fill: var(--green-bg); stroke: var(--green); filter: drop-shadow(0 0 8px rgba(74,222,128,0.6)); }
+.svg-circle.dest     { fill: var(--red-bg);   stroke: var(--red);   filter: drop-shadow(0 0 8px rgba(248,113,113,0.6)); }
+.svg-circle.visited  { fill: var(--blue-bg);  stroke: var(--blue);  filter: drop-shadow(0 0 6px rgba(96,165,250,0.4)); }
+.svg-circle.active   { fill: var(--amber-bg); stroke: var(--amber); filter: drop-shadow(0 0 8px rgba(251,191,36,0.6)); }
+.svg-circle.onpath   { fill: var(--green-bg); stroke: var(--green); filter: drop-shadow(0 0 10px rgba(74,222,128,0.7)); }
+
+.svg-label {
+  fill: #8b90aa;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-anchor: middle;
+  pointer-events: none;
+  transition: fill 0.3s;
+}
+.svg-label.source  { fill: var(--green); }
+.svg-label.dest    { fill: var(--red); }
+.svg-label.visited { fill: var(--blue); }
+.svg-label.onpath  { fill: var(--green); }
+.svg-label.active  { fill: var(--amber); }
+
+.svg-icon {
+  font-size: 14px;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+/* ── DS PANEL ── */
+.ds-panel {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+  min-height: 70px;
+}
+.ds-col { flex: 1; padding: 10px 16px; }
+.ds-divider { width: 1px; background: var(--border); }
+.ds-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 6px;
+}
+.ds-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-height: 26px;
+  align-items: center;
+}
+.ds-chip {
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid;
+  animation: chipPop 0.2s ease;
+}
+@keyframes chipPop { from { transform: scale(0); } to { transform: scale(1); } }
+.ds-chip.queue   { background: var(--blue-bg);  color: var(--blue);  border-color: var(--blue-d); }
+.ds-chip.stack   { background: var(--amber-bg); color: var(--amber); border-color: #3d2a00; }
+.ds-chip.visited { background: var(--green-bg); color: var(--green); border-color: var(--green-d); }
+.ds-empty { color: var(--text3); font-size: 10px; }
+
+/* ── LOG BOX ── */
+.log-card { flex: 1; }
+.log-box {
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.log-entry {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  animation: logSlide 0.2s ease;
+}
+@keyframes logSlide { from { opacity:0; transform:translateX(6px); } to { opacity:1; transform:translateX(0); } }
+.log-info   { background: rgba(96,165,250,0.05);  color: var(--text2); }
+.log-visit  { background: rgba(96,165,250,0.08);  color: var(--blue); }
+.log-push   { background: rgba(251,191,36,0.06);  color: var(--amber); }
+.log-found  { background: rgba(74,222,128,0.08);  color: var(--green); font-weight: 700; }
+.log-done   { background: rgba(74,222,128,0.1);   color: var(--green); }
+.log-sym { font-size: 12px; min-width: 14px; }
+
+/* ── CODE BOX ── */
+.code-card { flex-shrink: 0; }
+.code-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-family: var(--font);
+  font-size: 11px;
+  line-height: 1.9;
+  overflow-x: auto;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.kw  { color: #c084fc; }
+.tp  { color: #60a5fa; }
+.fn  { color: #4ade80; }
+.st  { color: #fbbf24; }
+.cm  { color: #555a75; font-style: italic; }
+.nm  { color: #fb923c; }
+.op  { color: #e2e4f0; }
+
+/* ── CONCEPT ── */
+.concept-body { font-size: 11px; color: var(--text2); line-height: 1.8; }
+.concept-body .concept-key { color: var(--cyan); font-weight: 600; }
+
+/* ── FOOTER ── */
+.site-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 28px;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.3px;
+}
+</style>
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header class="site-header">
+    <div class="header-left">
+      <div class="logo-mark">⬡</div>
+      <div>
+        <h1 class="site-title">SmartCity<span class="accent">Nav</span></h1>
+        <p class="site-sub">Data Structures &amp; Algorithms — Java Project</p>
+      </div>
+    </div>
+    <div class="header-tags">
+      <span class="tag tag-graph">Graph</span>
+      <span class="tag tag-bfs">BFS · Queue</span>
+      <span class="tag tag-dfs">DFS · Stack</span>
+      <span class="tag tag-tree">Path Finder</span>
+    </div>
+  </header>
+
+  <!-- ── MAIN LAYOUT ── -->
+  <main class="layout">
+
+    <!-- LEFT: Controls -->
+    <aside class="sidebar">
+
+      <section class="card">
+        <h2 class="card-title"><span class="dot dot-green"></span> Source Node</h2>
+        <select id="src-select" class="styled-select">
+          <option value="0">✈ Farooka</option>
+          <option value="1">🏥 Niazi Hospital</option>
+          <option value="2">🎓 University of Lahore</option>
+          <option value="3">🛒 Mall of Sarghodha</option>
+          <option value="4">🌳 Gulshan Town</option>
+          <option value="5">🚉 Sahiwal</option>
+          <option value="6">🏛 Goll Chok</option>
+          <option value="7">🏨 Shalimar City</option>
+          <option value="8">🏟 Stadium UOS</option>
+        </select>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title"><span class="dot dot-red"></span> Destination Node</h2>
+        <select id="dst-select" class="styled-select">
+          <option value="0">✈ Farooka</option>
+          <option value="1">🏥 Niazi Hospital</option>
+          <option value="2">🎓 University of Lahore</option>
+          <option value="3">🛒 Mall of Sarghodha</option>
+          <option value="4">🌳 Gulshan Town</option>
+          <option value="5">🚉 Sahiwal</option>
+          <option value="6">🏛 Goll Chok</option>
+          <option value="7">🏨 Shalimar City</option>
+          <option value="8" selected>🏟 Stadium UOS</option>
+        </select>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title"><span class="dot dot-blue"></span> Algorithm</h2>
+        <div class="algo-btns">
+          <button class="algo-btn active" id="btn-bfs" onclick="selectAlgo('BFS')">
+            <span class="algo-icon">⬛</span>
+            <span class="algo-name">BFS</span>
+            <span class="algo-desc">Shortest Path</span>
+          </button>
+          <button class="algo-btn" id="btn-dfs" onclick="selectAlgo('DFS')">
+            <span class="algo-icon">▼</span>
+            <span class="algo-name">DFS</span>
+            <span class="algo-desc">Deep Explore</span>
+          </button>
+        </div>
+      </section>
+
+      <button class="run-btn" onclick="runSearch()">
+        <span class="run-icon">▶</span> Run Algorithm
+      </button>
+      <button class="reset-btn" onclick="resetAll()">↺ Reset</button>
+
+      <!-- Path Result -->
+      <section class="card result-card" id="result-card" style="display:none">
+        <h2 class="card-title"><span class="dot dot-gold"></span> Result Path</h2>
+        <div class="path-chain" id="path-chain"></div>
+        <div class="path-stats" id="path-stats"></div>
+      </section>
+
+      <!-- History -->
+      <section class="card">
+        <h2 class="card-title"><span class="dot dot-purple"></span> Search History <span class="history-count" id="hist-count">0</span></h2>
+        <div class="history-list" id="history-list">
+          <p class="empty-msg">No searches yet.</p>
+        </div>
+        <button class="undo-btn" onclick="undoSearch()">↩ Undo Last</button>
+      </section>
+
+    </aside>
+
+    <!-- CENTER: Graph Canvas -->
+    <div class="canvas-area">
+      <div class="canvas-header">
+        <span class="canvas-label">City Graph — Adjacency List Representation</span>
+        <span class="canvas-hint" id="canvas-hint">Select nodes and run an algorithm</span>
+      </div>
+      <div class="canvas-wrap">
+        <svg id="graph-svg" viewBox="0 0 700 480" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+
+      <!-- DS Visualizer -->
+      <div class="ds-panel">
+        <div class="ds-col">
+          <div class="ds-label" id="ds-label-main">Queue (BFS)</div>
+          <div class="ds-track" id="ds-main">
+            <span class="ds-empty">empty</span>
+          </div>
+        </div>
+        <div class="ds-divider"></div>
+        <div class="ds-col">
+          <div class="ds-label">Visited</div>
+          <div class="ds-track" id="ds-visited">
+            <span class="ds-empty">none</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Log + Code -->
+    <aside class="sidebar sidebar-right">
+
+      <section class="card log-card">
+        <h2 class="card-title"><span class="dot dot-cyan"></span> Algorithm Log</h2>
+        <div class="log-box" id="log-box">
+          <div class="log-entry log-info">
+            <span class="log-sym">ℹ</span>
+            <span>Ready. Select nodes and run.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card code-card">
+        <h2 class="card-title"><span class="dot dot-orange"></span> Java Code — <span id="code-algo-label">BFS</span></h2>
+        <div class="code-box" id="code-box"></div>
+      </section>
+
+      <section class="card concept-card" id="concept-card">
+        <h2 class="card-title"><span class="dot dot-pink"></span> Concept</h2>
+        <div id="concept-body" class="concept-body"></div>
+      </section>
+
+    </aside>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="site-footer">
+    <span>Smart City Navigation System &nbsp;·&nbsp; DSA Project</span>
+    <span>Graph · BFS · DFS · Stack · Queue</span>
+  </footer>
+
+<script>
+/* ══════════════════════════════════════
+   SMART CITY NAVIGATION — app.js
+   Graph · BFS (Queue) · DFS (Stack)
+   ══════════════════════════════════════ */
+
+// ─── GRAPH DATA ───────────────────────────────────
+const NODES = [
+  { id: 0, name: "farooka",    icon: "✈", x: 120, y: 70  },
+  { id: 1, name: "Niazi Hospital",   icon: "🏥", x: 340, y: 60  },
+  { id: 2, name: "University of lahore", icon: "🎓", x: 570, y: 80  },
+  { id: 3, name: "Mall of sarghodha",       icon: "🛒", x: 80,  y: 220 },
+  { id: 4, name: "Gulshan town",       icon: "🌳", x: 310, y: 200 },
+  { id: 5, name: "Sahiwal",    icon: "🚉", x: 570, y: 220 },
+  { id: 6, name: "Goll chok",     icon: "🏛", x: 160, y: 370 },
+  { id: 7, name: "Shalimar smart city",      icon: "🏨", x: 390, y: 360 },
+  { id: 8, name: "Stadium UOS",    icon: "🏟", x: 600, y: 380 },
+];
+
+const EDGES = [
+  [0,1],[0,3],[1,2],[1,4],[2,5],
+  [3,4],[3,6],[4,5],[4,7],[5,8],
+  [6,7],[7,8]
+];
+
+// Build adjacency list
+const adj = Array.from({ length: NODES.length }, () => []);
+EDGES.forEach(([a, b]) => { adj[a].push(b); adj[b].push(a); });
+
+// ─── STATE ────────────────────────────────────────
+let currentAlgo = 'BFS';
+let animTimer   = null;
+let searchStack = [];   // History (Stack)
+let nodeStates  = {};   // 'default'|'source'|'dest'|'visited'|'active'|'onpath'
+
+// ─── SVG GRAPH RENDERER ───────────────────────────
+function initGraph() {
+  const svg = document.getElementById('graph-svg');
+  svg.innerHTML = '';
+
+  // Draw edges
+  EDGES.forEach(([a, b]) => {
+    const line = svgEl('line', {
+      x1: NODES[a].x, y1: NODES[a].y,
+      x2: NODES[b].x, y2: NODES[b].y,
+      class: 'svg-edge',
+      id: `edge-${a}-${b}`
+    });
+    svg.appendChild(line);
+  });
+
+  // Draw nodes
+  NODES.forEach(n => {
+    const g = svgEl('g', { class: 'svg-node-wrap', id: `node-${n.id}` });
+
+    // Pulse ring (hidden by default)
+    const ring = svgEl('circle', { cx: n.x, cy: n.y, r: 28, fill: 'none', stroke: 'transparent', 'stroke-width': 2, id: `ring-${n.id}`, opacity: 0 });
+
+    const circle = svgEl('circle', { cx: n.x, cy: n.y, r: 22, class: 'svg-circle', id: `circle-${n.id}` });
+    const icon   = svgEl('text',   { x: n.x, y: n.y - 4, class: 'svg-icon', id: `icon-${n.id}` });
+    icon.textContent = n.icon;
+    const label  = svgEl('text',   { x: n.x, y: n.y + 36, class: 'svg-label', id: `label-${n.id}` });
+    label.textContent = n.name;
+
+    g.appendChild(ring);
+    g.appendChild(circle);
+    g.appendChild(icon);
+    g.appendChild(label);
+    svg.appendChild(g);
+
+    nodeStates[n.id] = 'default';
+  });
+
+  resetSelects();
+}
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  return el;
+}
+
+// ─── NODE / EDGE STATE SETTERS ────────────────────
+function setNodeState(id, state) {
+  nodeStates[id] = state;
+  const circle = document.getElementById(`circle-${id}`);
+  const label  = document.getElementById(`label-${id}`);
+  if (!circle) return;
+
+  // Remove all state classes
+  circle.className.baseVal = 'svg-circle';
+  label.className.baseVal  = 'svg-label';
+
+  if (state !== 'default') {
+    circle.classList.add(state);
+    label.classList.add(state);
+  }
+}
+
+function setEdgeState(a, b, state) {
+  const el = document.getElementById(`edge-${a}-${b}`) ||
+             document.getElementById(`edge-${b}-${a}`);
+  if (!el) return;
+  el.className.baseVal = 'svg-edge';
+  if (state) el.classList.add(state);
+}
+
+function resetVisuals() {
+  NODES.forEach(n => setNodeState(n.id, 'default'));
+  EDGES.forEach(([a, b]) => setEdgeState(a, b, ''));
+}
+
+// ─── SELECTS → MARK SOURCE / DEST ─────────────────
+function resetSelects() {
+  const src = +document.getElementById('src-select').value;
+  const dst = +document.getElementById('dst-select').value;
+  resetVisuals();
+  setNodeState(src, 'source');
+  setNodeState(dst, 'dest');
+}
+
+document.getElementById('src-select').addEventListener('change', resetSelects);
+document.getElementById('dst-select').addEventListener('change', resetSelects);
+
+// ─── ALGO SELECTOR ────────────────────────────────
+function selectAlgo(algo) {
+  currentAlgo = algo;
+  document.getElementById('btn-bfs').className = 'algo-btn' + (algo === 'BFS' ? ' active' : '');
+  document.getElementById('btn-dfs').className = 'algo-btn' + (algo === 'DFS' ? ' active-dfs' : '');
+  document.getElementById('code-algo-label').textContent = algo;
+  document.getElementById('ds-label-main').textContent =
+    algo === 'BFS' ? 'Queue (BFS)' : 'Stack (DFS)';
+  showCode(algo);
+  showConcept(algo);
+}
+
+// ─── BFS — uses Queue ─────────────────────────────
+function bfsSteps(src, dst) {
+  const steps   = [];
+  const visited = new Set();
+  const parent  = {};
+  const queue   = [src];     // QUEUE DATA STRUCTURE
+  visited.add(src);
+
+  steps.push({ type: 'init', ds: [...queue], visited: [...visited] });
+
+  while (queue.length) {
+    const cur = queue.shift();        // dequeue (front)
+    steps.push({ type: 'dequeue', node: cur, ds: [...queue], visited: [...visited] });
+
+    if (cur === dst) {
+      steps.push({ type: 'found', path: buildPath(parent, src, dst) });
+      return steps;
+    }
+
+    for (const nb of adj[cur]) {
+      if (!visited.has(nb)) {
+        visited.add(nb);
+        parent[nb] = cur;
+        queue.push(nb);               // enqueue
+        steps.push({ type: 'enqueue', from: cur, node: nb, ds: [...queue], visited: [...visited] });
+      }
+    }
+  }
+  steps.push({ type: 'notfound' });
+  return steps;
+}
+
+// ─── DFS — uses Stack ─────────────────────────────
+function dfsSteps(src, dst) {
+  const steps   = [];
+  const visited = new Set();
+  const parent  = {};
+  const stack   = [src];     // STACK DATA STRUCTURE
+  steps.push({ type: 'init', ds: [...stack], visited: [] });
+
+  while (stack.length) {
+    const cur = stack.pop();          // pop (top)
+    if (visited.has(cur)) continue;
+    visited.add(cur);
+    steps.push({ type: 'pop', node: cur, ds: [...stack], visited: [...visited] });
+
+    if (cur === dst) {
+      steps.push({ type: 'found', path: buildPath(parent, src, dst) });
+      return steps;
+    }
+
+    for (const nb of [...adj[cur]].reverse()) {
+      if (!visited.has(nb)) {
+        parent[nb] = cur;
+        stack.push(nb);               // push
+        steps.push({ type: 'push', from: cur, node: nb, ds: [...stack], visited: [...visited] });
+      }
+    }
+  }
+  steps.push({ type: 'notfound' });
+  return steps;
+}
+
+// ─── PATH BUILDER ─────────────────────────────────
+function buildPath(parent, src, dst) {
+  const path = [];
+  for (let n = dst; n !== undefined; n = parent[n]) path.unshift(n);
+  return path;
+}
+
+// ─── RUN SEARCH ───────────────────────────────────
+function runSearch() {
+  clearTimeout(animTimer);
+  resetVisuals();
+  clearLog();
+  document.getElementById('result-card').style.display = 'none';
+
+  const src = +document.getElementById('src-select').value;
+  const dst = +document.getElementById('dst-select').value;
+
+  if (src === dst) {
+    addLog('⚠', 'Source and destination are the same!', 'log-info');
+    return;
+  }
+
+  setNodeState(src, 'source');
+  setNodeState(dst, 'dest');
+  document.getElementById('canvas-hint').textContent =
+    `${currentAlgo} running: ${NODES[src].name} → ${NODES[dst].name}`;
+
+  const btn = document.querySelector('.run-btn');
+  btn.classList.add('running');
+  btn.textContent = '⏳ Running...';
+
+  const steps    = currentAlgo === 'BFS' ? bfsSteps(src, dst) : dfsSteps(src, dst);
+  const dsType   = currentAlgo === 'BFS' ? 'queue' : 'stack';
+  const visitedSoFar = [];
+  let i = 0;
+
+  addLog('▶', `${currentAlgo} started: ${NODES[src].name} → ${NODES[dst].name}`, 'log-info');
+
+  function step() {
+    if (i >= steps.length) { finishRun(); return; }
+    const s = steps[i++];
+
+    if (s.type === 'init') {
+      addLog('🚀', `Initialized. ${dsType === 'queue' ? 'Enqueue' : 'Push'}: ${NODES[src].name}`, 'log-info');
+      updateDS(s.ds, dsType, visitedSoFar);
+    }
+    else if (s.type === 'dequeue' || s.type === 'pop') {
+      if (!visitedSoFar.includes(s.node)) visitedSoFar.push(s.node);
+      if (nodeStates[s.node] !== 'source' && nodeStates[s.node] !== 'dest')
+        setNodeState(s.node, 'visited');
+      addLog(dsType === 'queue' ? '⬅' : '⬇',
+        `${dsType === 'queue' ? 'Dequeue' : 'Pop'}: ${NODES[s.node].name}`, 'log-visit');
+      updateDS(s.ds, dsType, visitedSoFar);
+    }
+    else if (s.type === 'enqueue' || s.type === 'push') {
+      setEdgeState(s.from, s.node, 'active');
+      if (nodeStates[s.node] !== 'source' && nodeStates[s.node] !== 'dest')
+        setNodeState(s.node, 'active');
+      addLog(dsType === 'queue' ? '➡' : '⬆',
+        `${dsType === 'queue' ? 'Enqueue' : 'Push'}: ${NODES[s.node].name}`, 'log-push');
+      updateDS(s.ds, dsType, visitedSoFar);
+    }
+    else if (s.type === 'found') {
+      showPath(s.path, src, dst);
+      saveHistory(currentAlgo, src, dst, s.path);
+      finishRun();
+      return;
+    }
+    else if (s.type === 'notfound') {
+      addLog('❌', 'No path found between these locations.', 'log-info');
+      document.getElementById('canvas-hint').textContent = 'No path found';
+      finishRun();
+      return;
+    }
+
+    animTimer = setTimeout(step, 600);
+  }
+  step();
+}
+
+function finishRun() {
+  const btn = document.querySelector('.run-btn');
+  btn.classList.remove('running');
+  btn.innerHTML = '<span class="run-icon">▶</span> Run Algorithm';
+  document.getElementById('canvas-hint').textContent = 'Done';
+}
+
+// ─── SHOW FINAL PATH ──────────────────────────────
+function showPath(path, src, dst) {
+  // Color path edges + nodes
+  path.forEach((n, i) => {
+    if (n === src) setNodeState(n, 'source');
+    else if (n === dst) setNodeState(n, 'dest');
+    else setNodeState(n, 'onpath');
+    if (i > 0) setEdgeState(path[i - 1], n, 'path');
+  });
+
+  // Show result card
+  const card  = document.getElementById('result-card');
+  const chain = document.getElementById('path-chain');
+  const stats = document.getElementById('path-stats');
+  card.style.display = 'block';
+  chain.innerHTML = path.map((n, i) =>
+    `${i > 0 ? '<span class="path-arrow">→</span>' : ''}
+     <span class="path-node" style="animation-delay:${i * 0.1}s">${NODES[n].name}</span>`
+  ).join('');
+  stats.innerHTML = `Hops: <span>${path.length - 1}</span> &nbsp;·&nbsp; Algo: <span>${currentAlgo}</span>`;
+
+  addLog('✅', `Path found! ${path.length - 1} hops`, 'log-found');
+  document.getElementById('canvas-hint').textContent = `Path found in ${path.length - 1} hops`;
+}
+
+// ─── RESET ────────────────────────────────────────
+function resetAll() {
+  clearTimeout(animTimer);
+  resetVisuals();
+  clearLog();
+  addLog('ℹ', 'Reset. Select nodes and run an algorithm.', 'log-info');
+  document.getElementById('result-card').style.display = 'none';
+  document.getElementById('canvas-hint').textContent = 'Select nodes and run an algorithm';
+  updateDS([], currentAlgo === 'BFS' ? 'queue' : 'stack', []);
+  resetSelects();
+  const btn = document.querySelector('.run-btn');
+  btn.classList.remove('running');
+  btn.innerHTML = '<span class="run-icon">▶</span> Run Algorithm';
+}
+
+// ─── DS VISUALIZER ────────────────────────────────
+function updateDS(ds, type, visited) {
+  const main = document.getElementById('ds-main');
+  main.innerHTML = ds.length
+    ? ds.map(n => `<span class="ds-chip ${type}">${NODES[n].name}</span>`).join('')
+    : '<span class="ds-empty">empty</span>';
+
+  const vis = document.getElementById('ds-visited');
+  vis.innerHTML = visited.length
+    ? visited.map(n => `<span class="ds-chip visited">${NODES[n].name}</span>`).join('')
+    : '<span class="ds-empty">none</span>';
+}
+
+// ─── LOG ──────────────────────────────────────────
+function addLog(sym, msg, cls = 'log-info') {
+  const box = document.getElementById('log-box');
+  const div = document.createElement('div');
+  div.className = `log-entry ${cls}`;
+  div.innerHTML = `<span class="log-sym">${sym}</span><span>${msg}</span>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+function clearLog() { document.getElementById('log-box').innerHTML = ''; }
+
+// ─── SEARCH HISTORY — Stack operations ────────────
+function saveHistory(algo, src, dst, path) {
+  const record = { algo, from: NODES[src].name, to: NODES[dst].name, hops: path.length - 1 };
+  searchStack.push(record);
+  renderHistory();
+}
+
+function undoSearch() {
+  if (!searchStack.length) {
+    addLog('⚠', 'History stack is empty — nothing to undo.', 'log-info');
+    return;
+  }
+  const popped = searchStack.pop();
+  addLog('↩', `Undo: [${popped.algo}] ${popped.from} → ${popped.to}`, 'log-push');
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  document.getElementById('hist-count').textContent = searchStack.length;
+  if (!searchStack.length) {
+    list.innerHTML = '<p class="empty-msg">No searches yet.</p>';
+    return;
+  }
+  list.innerHTML = [...searchStack].reverse().map(r =>
+    `<div class="history-item">
+       <span class="hi-algo ${r.algo.toLowerCase()}">[${r.algo}]</span>
+       ${r.from} → ${r.to} &nbsp;·&nbsp; ${r.hops} hops
+     </div>`
+  ).join('');
+}
+
+// ─── CODE PREVIEW ─────────────────────────────────
+function showCode(algo) {
+  const box = document.getElementById('code-box');
+  if (algo === 'BFS') {
+    box.innerHTML = `
+<div><span class="cm">// BFS — uses Queue (level-by-level)</span></div>
+<div><span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">bfs</span>(<span class="kw">int</span> <span class="nm">src</span>, <span class="kw">int</span> <span class="nm">dst</span>) {</div>
+<div>&nbsp;&nbsp;<span class="tp">Queue</span>&lt;<span class="tp">Integer</span>&gt; <span class="nm">queue</span> = <span class="kw">new</span> <span class="tp">LinkedList</span>&lt;&gt;();</div>
+<div>&nbsp;&nbsp;<span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; <span class="nm">visited</span> = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();</div>
+<div>&nbsp;&nbsp;<span class="nm">queue</span>.add(<span class="nm">src</span>); <span class="nm">visited</span>.add(<span class="nm">src</span>);</div>
+<div>&nbsp;&nbsp;<span class="kw">while</span> (!<span class="nm">queue</span>.isEmpty()) {</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">int</span> <span class="nm">cur</span> = <span class="nm">queue</span>.<span class="fn">poll</span>(); <span class="cm">// dequeue</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (<span class="nm">cur</span> == <span class="nm">dst</span>) <span class="kw">return</span> <span class="fn">buildPath</span>(...);</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">for</span> (<span class="kw">int</span> <span class="nm">nb</span> : adj.get(<span class="nm">cur</span>)) {</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (!<span class="nm">visited</span>.contains(<span class="nm">nb</span>)) {</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nm">visited</span>.add(<span class="nm">nb</span>);</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nm">queue</span>.<span class="fn">add</span>(<span class="nm">nb</span>); <span class="cm">// enqueue</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} } }</div>
+<div>&nbsp;&nbsp;<span class="kw">return null</span>; <span class="cm">// no path</span></div>
+<div>}</div>`;
+  } else {
+    box.innerHTML = `
+<div><span class="cm">// DFS — uses Stack (deep dive first)</span></div>
+<div><span class="kw">public</span> <span class="tp">List</span>&lt;<span class="tp">Integer</span>&gt; <span class="fn">dfs</span>(<span class="kw">int</span> <span class="nm">src</span>, <span class="kw">int</span> <span class="nm">dst</span>) {</div>
+<div>&nbsp;&nbsp;<span class="tp">Stack</span>&lt;<span class="tp">Integer</span>&gt; <span class="nm">stack</span> = <span class="kw">new</span> <span class="tp">Stack</span>&lt;&gt;();</div>
+<div>&nbsp;&nbsp;<span class="tp">Set</span>&lt;<span class="tp">Integer</span>&gt; <span class="nm">visited</span> = <span class="kw">new</span> <span class="tp">HashSet</span>&lt;&gt;();</div>
+<div>&nbsp;&nbsp;<span class="nm">stack</span>.<span class="fn">push</span>(<span class="nm">src</span>);</div>
+<div>&nbsp;&nbsp;<span class="kw">while</span> (!<span class="nm">stack</span>.isEmpty()) {</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">int</span> <span class="nm">cur</span> = <span class="nm">stack</span>.<span class="fn">pop</span>(); <span class="cm">// pop top</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (<span class="nm">visited</span>.contains(<span class="nm">cur</span>)) <span class="kw">continue</span>;</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="nm">visited</span>.add(<span class="nm">cur</span>);</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (<span class="nm">cur</span> == <span class="nm">dst</span>) <span class="kw">return</span> <span class="fn">buildPath</span>(...);</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">for</span> (<span class="kw">int</span> <span class="nm">nb</span> : adj.get(<span class="nm">cur</span>)) {</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> (!<span class="nm">visited</span>.contains(<span class="nm">nb</span>)) {</div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="nm">stack</span>.<span class="fn">push</span>(<span class="nm">nb</span>); <span class="cm">// push</span></div>
+<div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} } }</div>
+<div>&nbsp;&nbsp;<span class="kw">return null</span>;</div>
+<div>}</div>`;
+  }
+}
+
+// ─── CONCEPT PANEL ────────────────────────────────
+function showConcept(algo) {
+  const body = document.getElementById('concept-body');
+  if (algo === 'BFS') {
+    body.innerHTML = `
+      <p><span class="concept-key">BFS</span> (Breadth-First Search) uses a <span class="concept-key">Queue</span> (FIFO).</p>
+      <p>It explores all neighbors at the current level before going deeper. This guarantees the <span class="concept-key">shortest path</span> in an unweighted graph.</p>
+      <p><span class="concept-key">Time:</span> O(V + E) &nbsp; <span class="concept-key">Space:</span> O(V)</p>
+    `;
+  } else {
+    body.innerHTML = `
+      <p><span class="concept-key">DFS</span> (Depth-First Search) uses a <span class="concept-key">Stack</span> (LIFO).</p>
+      <p>It dives as deep as possible along each branch before backtracking. Does <span class="concept-key">not</span> guarantee shortest path but uses less memory.</p>
+      <p><span class="concept-key">Time:</span> O(V + E) &nbsp; <span class="concept-key">Space:</span> O(V)</p>
+    `;
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────
+initGraph();
+showCode('BFS');
+showConcept('BFS');
+resetSelects();
+</script>
+</body>
+</html>
